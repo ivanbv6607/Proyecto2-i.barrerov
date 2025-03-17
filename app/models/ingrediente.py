@@ -26,12 +26,6 @@ class Ingredientes(db.Model):
     tipo = db.Column(db.Boolean, nullable=True)    
     es_vegetariano = db.Column(db.Boolean, nullable=True)
 
-    #ingrediente_id = db.Column(db.Integer, ForeignKey('producto_ingrediente.ingrediente'))
-    #producto_ingredientes = db.relationship("Productos", secondary=producto_ingrediente, lazy='subquery',
-    #     backref = db.backref('ingredientes', lazy = True))
-    #producto = db.relationship('producto_ingrediente', backref = 'ingrediente', lazy = 'dynamic')
-
-
     def __init__(self, nombre:str, costo:float, calorias:int, inventario:float, es_vegetariano:bool, tipo:str):
         self._nombre = nombre
         self._costo = costo
