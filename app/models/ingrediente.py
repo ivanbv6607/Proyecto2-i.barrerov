@@ -1,5 +1,4 @@
-from config.db import db
-from models.ingrediente_producto import producto_ingrediente
+from app.config.db import db
 from sqlalchemy import ForeignKey
 
 class Ingredientes(db.Model):
@@ -21,18 +20,24 @@ class Ingredientes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(200))
     costo = db.Column(db.Float, nullable=False)
-    calorias = db.Column(db.Integer, nullable=False)
+    calorias = db.Column(db.Integer, nullable=False) 
     inventario = db.Column(db.Float, nullable=False)
     tipo = db.Column(db.Boolean, nullable=True)    
     es_vegetariano = db.Column(db.Boolean, nullable=True)
+    """Producto = db.relationship('Productos', 
+                                secondary='producto_ingrediente',
+                                primaryjoin='ingredientes.id == producto_ingrediente.c.ingrediente_id',
+                                secondaryjoin='producto_ingrediente.c.producto_id == productos.id',
+                                back_populates='ingredientes',)
 
     def __init__(self, nombre:str, costo:float, calorias:int, inventario:float, es_vegetariano:bool, tipo:str):
         self._nombre = nombre
         self._costo = costo
         self._calorias = calorias
         self.inventario = inventario
-        self.es_vegetariano = es_vegetariano
-        self.tipo = None
+        self.tipo = tipo
+        self.es_vegetariano = es_vegetariano """
+
     
     def es_sano(self,calorias:int, vegetariano:bool):
         if self._calorias < 100 or self.es_vegetariano:
@@ -55,7 +60,7 @@ class Ingredientes(db.Model):
         self._costo = costo
   
     def obtener_calorias(self):
-        return self._calorias
+        return self.calorias
     
     def actualizar_calorias(self, calorias):
         self._calorias = calorias

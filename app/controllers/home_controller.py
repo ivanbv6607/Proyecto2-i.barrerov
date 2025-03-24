@@ -1,15 +1,17 @@
 from flask import Blueprint, render_template, request
-from models.producto import Productos
-from models.ingrediente import Ingredientes
-from models.ingrediente_producto import producto_ingrediente
-from config.db import db
+from app.models.producto import Productos
+from app.models.ingrediente import Ingredientes
+from app.models.producto import producto_ingrediente
+from app.config.db import db
 
 home_blueprint = Blueprint("home", __name__)
 
 @home_blueprint.route("/")
 def home():
     productos = []
+    #for producto in db.query(Productos).all():
     productos = Productos.query.all()
+    #productos =Productos.query.get_or_404(1)
     return render_template("index.html", productos = productos)
 
 
@@ -29,6 +31,10 @@ def producto(id):
     ingredientes.append(ig1)
     ingredientes.append(ig2)
     ingredientes.append(ig3)
+    calorias = ig1.calorias + ig2.calorias + ig3.calorias
+    if producto:
+        return render_template('producto.html', producto = producto, ingredientes = ingredientes, calorias = calorias)
+
     return render_template('producto.html', producto = producto, ingredientes = ingredientes)
 
 
@@ -78,4 +84,44 @@ def vender(id):
         return f'No hay existencia de ingrediente {nombre_ingrediente}'
     else:     return 'Vendido!'
 
-     
+
+@home_blueprint.route("/abastecer_ingrediente/<int:id>", methods=["GET"])
+def abastecer(id):
+    ingrediente = Ingredientes.query.get_or_404(id)
+    if ingrediente.tipo == 1:  # Base
+        ingrediente.inventario += 10
+    else: ingrediente.inventario += 5 # Complemento
+
+    db.session.commit()
+
+    if ingrediente.calorias < 100 or ingrediente.es_vegetariano:
+        es_sano = "SI"
+    else: es_sano ="NO"
+
+    return render_template('ingrediente.html', ingrediente = ingrediente, es_sano = es_sano)
+
+
+@home_blueprint.route('/renovar_id') 
+def renovar_id(): 
+    return render_template('renovar_ing.html')
+
+@home_blueprint.route("/renovar")
+def renovar():
+    try:
+        id = request.args.get("id")
+
+        ingrediente = Ingredientes.query.filter_by(id=id).first()
+
+        if ingrediente:
+            ingrediente.inventario = 0
+            db.session.commit()
+
+        if ingrediente.calorias < 100 or ingrediente.es_vegetariano:
+            es_sano = "SI"
+        else: es_sano ="NO"
+
+        return render_template('ingrediente.html', ingrediente = ingrediente, es_sano = es_sano)
+    except: 
+            #flash("PRODUCTO NO EXISTE")
+            return render_template('renovar_ing.html')
+
